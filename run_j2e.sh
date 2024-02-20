@@ -2,25 +2,42 @@
 
 type="j2e"
 
+source "./vars.sh"
 source "./$type/vars.sh"
 
-# ./ja 初期化
-mkdir -p "$ja_dir"
+is_markdown=false
 
-if [ ! -f "$ja_dir/$ja_file" ]; then
-    echo "$ja_dir/$ja_file が存在しません。空ファイルだけ作成し、処理を終了します。"
-    touch "$ja_dir/$ja_file"
+while getopts ":m" opt; do
+    case $opt in
+        m)
+        is_markdown=true
+        ;;
+        \?)
+        echo "Invalid option: -$OPTARG" >&2
+        ;;
+        :)
+        echo "Option -$OPTARG requires an argument." >&2
+        ;;
+    esac
+done
+
+# ./ja 初期化
+mkdir -p "$data_dir"
+
+if [ ! -f "$data_dir/$ja_file" ]; then
+    echo "$data_dir/$ja_file が存在しません。空ファイルだけ作成し、処理を終了します。"
+    touch "$data_dir/$ja_file"
     exit 1
 fi
 
 # ./en 初期化
-mkdir -p "$en_dir"
+mkdir -p "$data_dir"
 
-[ -f "$en_dir/$en_file" ] && rm "$en_dir/$en_file"
-[ ! -f "$en_dir/$en_file" ] && touch "$en_dir/$en_file"
+[ -f "$data_dir/$en_file" ] && rm "$data_dir/$en_file"
+[ ! -f "$data_dir/$en_file" ] && touch "$data_dir/$en_file"
 
-if [ -f "$ja_dir/$ja_file" ] && [ ! -s "$ja_dir/$ja_file" ]; then
-    echo "$ja_dir/$ja_file に日本語文が書かれていないため、処理を終了します"
+if [ -f "$data_dir/$ja_file" ] && [ ! -s "$data_dir/$ja_file" ]; then
+    echo "$data_dir/$ja_file に日本語文が書かれていないため、処理を終了します"
     exit 1
 fi
 
@@ -35,17 +52,27 @@ do
 done
 
 if [ "$REPLY" = '1' ]; then
-    echo "GPT-3.5 Turbo で翻訳開始"
-    "./$type/chatgpt_35_turbo.sh"
+    if $is_markdown; then
+        echo "GPT-3.5 Turbo で翻訳開始 [Markdown Summary]"
+        "./$type/$cg35_dir/md.sh"
+    else
+        echo "GPT-3.5 Turbo で翻訳開始"
+        "./$type/$cg35_dir/normal.sh"
+    fi
 elif [ "$REPLY" = '2' ]; then
-    echo "GPT-4 Turbo で翻訳開始"
-    "./$type/chatgpt_40_turbo.sh"
+    if $is_markdown; then
+        echo "GPT-4 Turbo で翻訳開始 [Markdown Summary]"
+        "./$type/$cg40_dir/md.sh"
+    else
+        echo "GPT-4 Turbo で翻訳開始"
+        "./$type/$cg40_dir/normal.sh"
+    fi
 fi
 
 # 日本語削除
-truncate -s 0 "$ja_dir/$ja_file"
-echo "$ja_dir/$ja_file の日本語文は初期化されました"
+truncate -s 0 "$data_dir/$ja_file"
+echo "$data_dir/$ja_file の日本語文は初期化されました"
 
 # Mac のクリップボードに英語翻訳をコピー
-cat "$en_dir/$en_file" | pbcopy
+cat "$data_dir/$en_file" | pbcopy
 echo "Mac のクリップボードに英語翻訳がコピーされました"
