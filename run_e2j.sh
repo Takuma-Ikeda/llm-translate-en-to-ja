@@ -1,6 +1,8 @@
 #!/bin/bash
 
-source ./vars.sh
+type="e2j"
+
+source "./$type/vars.sh"
 
 # ./en 初期化
 mkdir -p "$en_dir"
@@ -34,10 +36,10 @@ done
 
 if [ "$REPLY" = '1' ]; then
     echo "GPT-3.5 Turbo で翻訳開始"
-    ./chatgpt_35_turbo.sh
+    "./$type/chatgpt_35_turbo.sh"
 elif [ "$REPLY" = '2' ]; then
     echo "GPT-4 Turbo で翻訳開始"
-    ./chatgpt_40_turbo.sh
+    "./$type/chatgpt_40_turbo.sh"
 fi
 
 # 英文削除
