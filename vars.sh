@@ -1,3 +1,5 @@
+#!/bin/bash
+
 en_dir="./en"
 en_file="target.txt"
 ja_dir="./ja"

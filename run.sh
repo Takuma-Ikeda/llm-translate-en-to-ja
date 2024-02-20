@@ -13,6 +13,7 @@ fi
 
 # ./ja 初期化
 mkdir -p "$ja_dir"
+
 [ -f "$ja_dir/$ja_file" ] && rm "$ja_dir/$ja_file"
 [ ! -f "$ja_dir/$ja_file" ] && touch "$ja_dir/$ja_file"
 
@@ -21,6 +22,7 @@ if [ -f "$en_dir/$en_file" ] && [ ! -s "$en_dir/$en_file" ]; then
     exit 1
 fi
 
+# 学習モデル選択肢
 select version in "GPT-3.5 Turbo" "GPT-4 Turbo";
 do
     if [ -z "$version" ]; then
@@ -38,5 +40,10 @@ elif [ "$REPLY" = '2' ]; then
     ./chatgpt_40_turbo.sh
 fi
 
+# 英文削除
 truncate -s 0 "$en_dir/$en_file"
 echo "$en_dir/$en_file の英文は初期化されました"
+
+# Mac のクリップボードに日本語翻訳をコピー
+cat "$ja_dir/$ja_file" | pbcopy
+echo "Mac のクリップボードに日本語翻訳がコピーされました"
